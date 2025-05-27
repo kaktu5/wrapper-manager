@@ -15,6 +15,7 @@ let
       name,
       force,
       value,
+      generator,
     }:
     let
       unsetArg =
@@ -42,11 +43,12 @@ let
       setArg =
         let
           arg = if force then "--set" else "--set-default";
+          value' = if generator != null then generator value else value;
         in
         [
           arg
           name
-          value
+          value'
         ];
     in
     if value == null then unsetArg else setArg;

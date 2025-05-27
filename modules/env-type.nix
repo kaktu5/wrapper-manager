@@ -17,17 +17,33 @@ in {
 
     value = mkOption {
       type = let
-        inherit (types) coercedTo anything str nullOr;
+        inherit (types) anything attrsOf coercedTo either nullOr str;
         strLike = coercedTo anything (x: "${x}") str;
       in
-        nullOr strLike;
+        nullOr (either (attrsOf anything) strLike);
       description = ''
         Value of the variable to be set.
         Set to `null` to unset the variable.
 
+        Can be either:
+        - A string or a type convertible to it
+        - An attribute set which must be used with a `generator` to convert it to a path or string
+
         Note that any environment variable will be escaped. For example, `value = "$HOME"`
         will be converted to the literal `$HOME`, with its dollar sign.
       '';
+    };
+
+    generator = mkOption {
+      type = let
+        inherit (types) either functionTo nullOr path str;
+      in
+        nullOr (functionTo (either path str));
+      description = ''
+        Function that when applied to `value` returns a path or string.
+        Required if `value` is an attribute set.
+      '';
+      default = null;
     };
 
     force = mkOption {
